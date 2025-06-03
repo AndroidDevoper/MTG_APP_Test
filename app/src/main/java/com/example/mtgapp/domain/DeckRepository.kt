@@ -1,4 +1,4 @@
-package com.example.mtgapp.bd
+package com.example.mtgapp.domain
 
 
 import android.content.Context
@@ -10,7 +10,6 @@ import com.google.gson.Gson
 class DeckRepository(context: Context) {
     private val sharedPrefs: SharedPreferences = context.getSharedPreferences("decks_prefs", Context.MODE_PRIVATE)
     private val decksDir = context.filesDir.absolutePath + "/decks"
-    private var currentId = sharedPrefs.getInt("current_id", 0)
 
     init {
         File(decksDir).apply {
@@ -20,6 +19,17 @@ class DeckRepository(context: Context) {
 
     // Получение всех колод
     fun getAllDecks(): List<Deck> {
+        return mutableListOf<Deck>().apply {
+            repeat(20) {
+                add(
+                    Deck(
+                        id = it,
+                        name = "Колода $it",
+                        imageUrl = ""
+                    )
+                )
+            }
+        }
         val deckIds = sharedPrefs.getStringSet("deck_ids", setOf()) ?: setOf()
         return deckIds.mapNotNull { getDeckById(it.toInt()) }
     }
@@ -34,7 +44,7 @@ class DeckRepository(context: Context) {
     // Добавление новой колоды
     fun createDeck(name: String, imageUrl: String): Deck {
         val newDeck = Deck(
-            id = ++currentId,
+            id = getAllDecks().size + 1,
             name = name,
             imageUrl = imageUrl,
         )

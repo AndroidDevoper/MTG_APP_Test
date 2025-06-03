@@ -1,10 +1,6 @@
-package com.example.mtgapp
+package com.example.mtgapp.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,9 +10,8 @@ import androidx.compose.ui.unit.dp
 import com.example.mtgapp.ui.theme.MTGAPPTheme
 
 @Composable
-fun SelectModeScreen(
-    navigateToStandard: () -> Unit,
-    navigateToCommander: () -> Unit
+fun CommanderScreen(
+    onPlayersCountSelected: (Int) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -25,27 +20,39 @@ fun SelectModeScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Button(
-            onClick = navigateToStandard,
+            onClick = { onPlayersCountSelected(3) },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Standart")
+            Text("3")
         }
 
         Button(
-            onClick = navigateToCommander,
+            onClick = { onPlayersCountSelected(4) },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Commander")
+            Text("4")
         }
 
+        Button(
+            onClick = { onPlayersCountSelected(5) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("5")
+        }
 
+        Button(
+            onClick = { onPlayersCountSelected(6) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("6")
+        }
     }
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
-fun SelectModePreview() {
+private fun CommanderScreenPreview() {
     MTGAPPTheme {
-        SelectModeScreen({},{})
+        CommanderScreen {  }
     }
 }

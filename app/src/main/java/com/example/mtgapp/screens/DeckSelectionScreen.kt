@@ -1,5 +1,6 @@
-package com.example.mtgapp
+package com.example.mtgapp.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,29 +12,51 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.mtgapp.models.Deck
+import com.example.mtgapp.models.*
 import com.example.mtgapp.ui.theme.MTGAPPTheme
 import kotlin.random.Random
 
+@SuppressLint("MutableCollectionMutableState")
 @Composable
 fun DeckSelectionScreen(
-    navigateToGame: (Int) -> Unit, // Принимает название выбранной колоды
+    playersCount: Int,
     decks: List<Deck>,
+    navigateToGame: (List<Player>) -> Unit,
 ) {
+    var currentPlayer by remember { mutableIntStateOf(1) }
+    val players by remember { mutableStateOf(mutableListOf<Player>()) }
+
+    fun selectDeck(deck: Deck) {
+        players.add(
+            Player(
+                id = players.size + 1,
+                deck = deck
+            )
+        )
+        if (players.size >= playersCount) {
+            navigateToGame(players)
+        } else {
+            currentPlayer += 1
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        Text("Игрок $currentPlayer")
+
         // Кнопка случайной колоды
         Button(
             onClick = {
-                Random.nextInt(0, decks.size)
+                val deck = decks[Random.nextInt(1, decks.size)]
+                selectDeck(deck)
             },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
@@ -47,7 +70,7 @@ fun DeckSelectionScreen(
         LazyColumn {
             items(decks) { deck ->
                 Button(
-                    onClick = { navigateToGame(deck.id) },
+                    onClick = { selectDeck(deck) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary
@@ -65,6 +88,7 @@ fun DeckSelectionScreen(
 private fun DeckSelectionScreenPreview() {
     MTGAPPTheme {
         DeckSelectionScreen(
+            playersCount = 2,
             navigateToGame = {},
             decks = listOf(
                 Deck(

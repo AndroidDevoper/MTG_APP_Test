@@ -5,21 +5,27 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.savedstate.SavedState
-import com.example.mtgapp.bd.DeckRepository
+import androidx.navigation.navArgument
+import com.example.mtgapp.domain.DeckRepository
+import com.example.mtgapp.models.GameMode
+import com.example.mtgapp.models.Player
+import com.example.mtgapp.screens.*
 import com.example.mtgapp.ui.theme.MTGAPPTheme
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.net.URLEncoder
 
 class MainActivity : ComponentActivity() {
 
-    lateinit var deckRepository: DeckRepository
+    private lateinit var deckRepository: DeckRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         deckRepository = DeckRepository(this)
-        enableEdgeToEdge()
         setContent {
             MTGAPPTheme {
                 AppNavigation(deckRepository)
@@ -29,7 +35,7 @@ class MainActivity : ComponentActivity() {
 }
 //Навигация
 @Composable
-fun AppNavigation(deckRepository: DeckRepository) {
+private fun AppNavigation(deckRepository: DeckRepository) {
     val navController = rememberNavController()
 
     NavHost(
@@ -46,16 +52,58 @@ fun AppNavigation(deckRepository: DeckRepository) {
 
         composable("select-mode") {
             SelectModeScreen(
-                navigateToStandard = { navController.navigate("deck-selection") },
-                navigateToCommander = { navController.navigate() }
+                navigateToStandard = { navController.navigate("deck-selection/${GameMode.STANDARD}/2") },
+                navigateToCommander = { navController.navigate("commander") }
             )
         }
 
-        composable("deck-selection/{gameType}") {
+        composable("commander") {
+            CommanderScreen(
+                onPlayersCountSelected = {
+                    navController.navigate("deck-selection/${GameMode.COMMANDER}/$it")
+                }
+            )
+        }
 
+        composable(
+            route = "deck-selection/{gameMode}/{playersCount}",
+            arguments = listOf(
+                navArgument("gameMode") {
+                    type = NavType.StringType
+                },
+                navArgument("playersCount") {
+                    type = NavType.IntType
+                }
+            )
+        ) { navBackStack ->
+            val argsGameMode = navBackStack.arguments?.getString("gameMode") ?: return@composable
+            val argsPlayersCount = navBackStack.arguments?.getInt("playersCount") ?: return@composable
             DeckSelectionScreen(
-                navigateToGame = {},
+                playersCount = argsPlayersCount,
+                navigateToGame = {
+                    val players = URLEncoder.encode(Gson().toJson(it), "UTF-8")
+                    navController.navigate("game/$argsGameMode/$players")
+                },
                 decks = deckRepository.getAllDecks()
+            )
+        }
+
+        composable(
+            route = "game/{gameMode}/{players}",
+            arguments = listOf(
+                navArgument("gameMode") {
+                    type = NavType.StringType
+                },
+                navArgument("players") {
+                    type = NavType.StringType
+                }
+            )
+        ) { navBackStack ->
+            val argsGameMode = navBackStack.arguments?.getString("gameMode") ?: return@composable
+            val argsPlayers = navBackStack.arguments?.getString("players") ?: return@composable
+            GameScreen(
+                mode = GameMode.valueOf(argsGameMode),
+                players = Gson().fromJson(argsPlayers, object : TypeToken<List<Player>>() {}.type)
             )
         }
     }

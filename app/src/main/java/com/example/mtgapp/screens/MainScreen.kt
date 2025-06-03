@@ -1,4 +1,4 @@
-package com.example.mtgapp
+package com.example.mtgapp.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
