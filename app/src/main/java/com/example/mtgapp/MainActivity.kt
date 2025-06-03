@@ -84,7 +84,8 @@ private fun AppNavigation(deckRepository: DeckRepository) {
                     val players = URLEncoder.encode(Gson().toJson(it), "UTF-8")
                     navController.navigate("game/$argsGameMode/$players")
                 },
-                decks = deckRepository.getAllDecks()
+                decksFlow = deckRepository.decksFlow,
+                onCreateDeckClick = {  }
             )
         }
 

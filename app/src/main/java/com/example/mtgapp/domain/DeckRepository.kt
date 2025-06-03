@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import com.example.mtgapp.models.Deck
 import java.io.File
 import com.google.gson.Gson
+import kotlinx.coroutines.flow.*
 
 class DeckRepository(context: Context) {
     private val sharedPrefs: SharedPreferences = context.getSharedPreferences("decks_prefs", Context.MODE_PRIVATE)
@@ -16,6 +17,10 @@ class DeckRepository(context: Context) {
             if (!exists()) mkdir()
         }
     }
+
+    val decksFlow = MutableStateFlow(getAllDecks())
+
+    private fun updateFlow() { decksFlow.update { getAllDecks() } }
 
     // Получение всех колод
     fun getAllDecks(): List<Deck> {
@@ -63,6 +68,7 @@ class DeckRepository(context: Context) {
             .remove("deck_$id")
             .remove("deck_ids")
             .apply()
+        updateFlow()
     }
 
     private fun saveDeck(deck: Deck) {
@@ -71,5 +77,6 @@ class DeckRepository(context: Context) {
         editor.putInt("current_id", deck.id)
         editor.putStringSet("deck_ids", sharedPrefs.getStringSet("deck_ids", setOf())?.plus(deck.id.toString()))
         editor.apply()
+        updateFlow()
     }
 }

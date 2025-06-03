@@ -7,8 +7,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.*
+import com.example.mtgapp.R
 import com.example.mtgapp.models.*
 import com.example.mtgapp.ui.theme.MTGAPPTheme
 
@@ -17,6 +21,40 @@ fun GameScreen(
     mode: GameMode,
     players: List<Player>
 ) {
+    when (mode) {
+        GameMode.STANDARD -> GameStandardScreen(players)
+        GameMode.COMMANDER -> GameCommandScreen(players)
+    }
+}
+
+@Composable
+fun GameStandardScreen(players: List<Player>) {
+    val columnCount = (players.size.plus(1)).div(2)
+    Row(modifier = Modifier.fillMaxSize()) {
+        repeat(columnCount) { rowIndex ->
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                PlayerSector(
+                    modifier = Modifier.weight(1f),
+                    mode = GameMode.STANDARD,
+                    player = players.getOrNull(rowIndex.times(2))
+                )
+
+                PlayerSector(
+                    modifier = Modifier.weight(1f),
+                    mode = GameMode.STANDARD,
+                    player = players.getOrNull(rowIndex.times(2).plus(1))
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun GameCommandScreen(players: List<Player>) {
     val rowCount = (players.size.plus(1)).div(2)
     Column(
         modifier = Modifier.fillMaxSize()
@@ -28,12 +66,14 @@ fun GameScreen(
                     .fillMaxWidth()
             ) {
                 PlayerSector(
-                    mode = mode,
+                    modifier = Modifier.weight(1f),
+                    mode = GameMode.COMMANDER,
                     player = players.getOrNull(rowIndex.times(2))
                 )
 
                 PlayerSector(
-                    mode = mode,
+                    modifier = Modifier.weight(1f),
+                    mode = GameMode.COMMANDER,
                     player = players.getOrNull(rowIndex.times(2).plus(1))
                 )
             }
@@ -42,16 +82,16 @@ fun GameScreen(
 }
 
 @Composable
-private fun RowScope.PlayerSector(
+private fun PlayerSector(
+    modifier: Modifier,
     mode: GameMode,
     player: Player?
 ) {
     var cardCount by remember { mutableIntStateOf(mode.cardCount) }
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
-            .weight(1f)
-            .padding(8.dp),
+            .padding(4.dp),
         colors = CardDefaults.cardColors().copy(
             containerColor = if (player == null)
                 Color.Black
@@ -65,29 +105,74 @@ private fun RowScope.PlayerSector(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    modifier = Modifier.clickable {
-                        cardCount += 1
-                    },
-                    text = "+",
-                    color = Color.White,
-                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .clickable { cardCount += 1 }
+                ) {
+                    Icon(
+                        modifier = Modifier.size(40.dp)
+                            .align(Alignment.Center),
+                        painter = painterResource(R.drawable.ic_plus),
+                        tint = Color.White,
+                        contentDescription = null,
+                    )
+                }
 
-                Text(
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    text = "$cardCount",
-                    color = Color.White,
-                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center)
+                    ) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                            fontSize = TextUnit(32f, TextUnitType.Sp),
+                            fontWeight = FontWeight.Bold,
+                            text = "$cardCount",
+                            color = Color.White,
+                        )
 
-                Text(
-                    modifier = Modifier.clickable {
-                        cardCount -= 1
-                    },
-                    text = "-",
-                    color = Color.White,
-                )
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = player.deck.name,
+                            textAlign = TextAlign.Center,
+                            color = Color.White,
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .clickable { cardCount -= 1 }
+                ) {
+                    Icon(
+                        modifier = Modifier.size(24.dp)
+                            .align(Alignment.Center),
+                        painter = painterResource(R.drawable.ic_minus),
+                        tint = Color.White,
+                        contentDescription = null,
+                    )
+                }
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun GameScreen2Preview() {
+    MTGAPPTheme {
+        GameScreen(
+            mode = GameMode.STANDARD,
+            players = previewPlayers(2)
+        )
     }
 }
 
@@ -96,7 +181,7 @@ private fun RowScope.PlayerSector(
 private fun GameScreen3Preview() {
     MTGAPPTheme {
         GameScreen(
-            mode = GameMode.STANDARD,
+            mode = GameMode.COMMANDER,
             players = previewPlayers(3)
         )
     }
