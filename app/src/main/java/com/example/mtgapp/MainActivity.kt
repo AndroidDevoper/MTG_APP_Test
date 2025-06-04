@@ -107,6 +107,12 @@ private fun AppNavigation(deckRepository: DeckRepository) {
                 players = Gson().fromJson(argsPlayers, object : TypeToken<List<Player>>() {}.type)
             )
         }
+
+        composable(route = "deck-create") {
+            DecksCreateScreen(
+                onSaveClick =
+            )
+        }
     }
 }
 

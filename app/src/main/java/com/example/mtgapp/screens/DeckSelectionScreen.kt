@@ -72,9 +72,7 @@ fun DeckSelectionScreen(
         }
 
         Button(
-            onClick = {
-
-            },
+            onClick = onCreateDeckClick,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.secondary
