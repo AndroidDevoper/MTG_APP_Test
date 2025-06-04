@@ -7,6 +7,8 @@ import com.example.mtgapp.models.Deck
 import java.io.File
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.*
+import java.util.UUID
+import kotlin.random.Random
 
 class DeckRepository(context: Context) {
     private val sharedPrefs: SharedPreferences = context.getSharedPreferences("decks_prefs", Context.MODE_PRIVATE)
@@ -24,24 +26,12 @@ class DeckRepository(context: Context) {
 
     // Получение всех колод
     fun getAllDecks(): List<Deck> {
-        return mutableListOf<Deck>().apply {
-            repeat(20) {
-                add(
-                    Deck(
-                        id = it,
-                        name = "Колода $it",
-                        imageUrl = ""
-                    )
-                )
-            }
-        }
         val deckIds = sharedPrefs.getStringSet("deck_ids", setOf()) ?: setOf()
         return deckIds.mapNotNull { getDeckById(it.toInt()) }
     }
 
     // Получение колоды по ID
     fun getDeckById(id: Int): Deck? {
-
         val json = sharedPrefs.getString("deck_$id", null)
         return json?.let { Gson().fromJson(it, Deck::class.java) }
     }
@@ -49,7 +39,7 @@ class DeckRepository(context: Context) {
     // Добавление новой колоды
     fun createDeck(name: String, imageUrl: String): Deck {
         val newDeck = Deck(
-            id = getAllDecks().size + 1,
+            id = Random.nextInt(),
             name = name,
             imageUrl = imageUrl,
         )
@@ -57,16 +47,10 @@ class DeckRepository(context: Context) {
         return newDeck
     }
 
-    // Обновление колоды
-    fun updateDeck(deck: Deck) {
-        saveDeck(deck)
-    }
-
     // Удаление колоды
     fun deleteDeck(id: Int) {
         sharedPrefs.edit()
             .remove("deck_$id")
-            .remove("deck_ids")
             .apply()
         updateFlow()
     }

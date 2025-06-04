@@ -1,23 +1,30 @@
 package com.example.mtgapp.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
+import com.example.mtgapp.R
 import com.example.mtgapp.composable.CommonButton
 import com.example.mtgapp.ui.theme.MTGAPPTheme
 
 @Composable
 fun MainScreen(
-    navigateToGame: () -> Unit,
-    navigateToDecks: () -> Unit,
-    navigateToStats: () -> Unit
+    navigateToGame: () -> Unit
 ) {
     Box {
+        Image(
+            painter = painterResource(R.drawable.img_main),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+        )
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -29,16 +36,6 @@ fun MainScreen(
                 text = "Начать игру",
                 onClick = navigateToGame
             )
-
-            CommonButton(
-                text = "Управление колодами",
-                onClick = navigateToDecks
-            )
-
-            CommonButton(
-                text = "Статистика",
-                onClick = navigateToStats
-            )
         }
     }
 }
@@ -47,6 +44,6 @@ fun MainScreen(
 @Composable
 fun MainScreenPreview() {
     MTGAPPTheme {
-        MainScreen({},{},{})
+        MainScreen({})
     }
 }

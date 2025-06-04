@@ -33,6 +33,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 //Навигация
 @Composable
 private fun AppNavigation(deckRepository: DeckRepository) {
@@ -45,8 +46,6 @@ private fun AppNavigation(deckRepository: DeckRepository) {
         composable("main") {
             MainScreen(
                 navigateToGame = { navController.navigate("select-mode") },
-                navigateToDecks = { navController.navigate("decks") },
-                navigateToStats = { navController.navigate("stats") }
             )
         }
 
@@ -85,7 +84,8 @@ private fun AppNavigation(deckRepository: DeckRepository) {
                     navController.navigate("game/$argsGameMode/$players")
                 },
                 decksFlow = deckRepository.decksFlow,
-                onCreateDeckClick = {  }
+                onCreateDeckClick = { navController.navigate("deck-create") },
+                onDeleteClicked = { deckRepository.deleteDeck(it) }
             )
         }
 
@@ -110,7 +110,10 @@ private fun AppNavigation(deckRepository: DeckRepository) {
 
         composable(route = "deck-create") {
             DecksCreateScreen(
-                onSaveClick =
+                onSaveClicked = { name, imageUrl ->
+                    deckRepository.createDeck(name, imageUrl)
+                    navController.popBackStack()
+                }
             )
         }
     }

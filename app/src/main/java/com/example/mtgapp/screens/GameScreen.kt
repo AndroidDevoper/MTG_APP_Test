@@ -1,5 +1,6 @@
 package com.example.mtgapp.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -7,11 +8,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.mtgapp.R
 import com.example.mtgapp.models.*
 import com.example.mtgapp.ui.theme.MTGAPPTheme
@@ -100,65 +105,81 @@ private fun PlayerSector(
         )
     ) {
         player?.let {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .clickable { cardCount += 1 }
-                ) {
-                    Icon(
-                        modifier = Modifier.size(40.dp)
-                            .align(Alignment.Center),
-                        painter = painterResource(R.drawable.ic_plus),
-                        tint = Color.White,
-                        contentDescription = null,
-                    )
-                }
+            val painter = rememberAsyncImagePainter(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(it.deck.imageUrl)
+                    .crossfade(true)
+                    .build()
+            )
 
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
+            Box(modifier = Modifier.fillMaxSize()) {
+                Image(
+                    painter = painter,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                )
+
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .clickable { cardCount += 1 }
                     ) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            fontSize = TextUnit(32f, TextUnitType.Sp),
-                            fontWeight = FontWeight.Bold,
-                            text = "$cardCount",
-                            color = Color.White,
-                        )
-
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = player.deck.name,
-                            textAlign = TextAlign.Center,
-                            color = Color.White,
+                        Icon(
+                            modifier = Modifier.size(60.dp)
+                                .align(Alignment.Center),
+                            painter = painterResource(R.drawable.ic_plus),
+                            tint = Color.White,
+                            contentDescription = null,
                         )
                     }
-                }
 
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .clickable { cardCount -= 1 }
-                ) {
-                    Icon(
-                        modifier = Modifier.size(24.dp)
-                            .align(Alignment.Center),
-                        painter = painterResource(R.drawable.ic_minus),
-                        tint = Color.White,
-                        contentDescription = null,
-                    )
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.align(Alignment.Center)
+                        ) {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center,
+                                fontSize = TextUnit(32f, TextUnitType.Sp),
+                                fontWeight = FontWeight.Bold,
+                                text = "$cardCount",
+                                color = Color.White,
+                            )
+
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = player.deck.name,
+                                textAlign = TextAlign.Center,
+                                color = Color.White,
+                            )
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .clickable { cardCount -= 1 }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(32.dp)
+                                .align(Alignment.Center),
+                            painter = painterResource(R.drawable.ic_minus),
+                            tint = Color.White,
+                            contentDescription = null,
+                        )
+                    }
                 }
             }
         }

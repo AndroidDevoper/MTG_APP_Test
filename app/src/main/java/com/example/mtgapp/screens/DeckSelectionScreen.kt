@@ -1,17 +1,25 @@
 package com.example.mtgapp.screens
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.*
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.*
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import com.example.mtgapp.R
+import com.example.mtgapp.composable.TitleText
 import com.example.mtgapp.models.*
 import com.example.mtgapp.ui.theme.MTGAPPTheme
 import kotlinx.coroutines.flow.*
@@ -24,6 +32,7 @@ fun DeckSelectionScreen(
     decksFlow: Flow<List<Deck>>,
     navigateToGame: (List<Player>) -> Unit,
     onCreateDeckClick: () -> Unit,
+    onDeleteClicked: (Int) -> Unit
 ) {
     var currentPlayer by remember { mutableIntStateOf(1) }
 
@@ -44,18 +53,21 @@ fun DeckSelectionScreen(
         }
     }
 
+    Image(
+        painter = painterResource(R.drawable.img_deck_selection),
+        contentDescription = null,
+        modifier = Modifier.fillMaxSize(),
+        contentScale = ContentScale.Crop,
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
     ) {
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            text = "Выберает игрок $currentPlayer",
-            textAlign = TextAlign.Center
-        )
+        TitleText(text = "Выберает игрок $currentPlayer")
+
+        Spacer(Modifier.height(12.dp))
 
         // Кнопка случайной колоды
         Button(
@@ -83,13 +95,19 @@ fun DeckSelectionScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        DecksList(decks)
+        DecksList(
+            decks = decks,
+            onSelectDeck = { selectDeck(it) },
+            onDeleteClicked = onDeleteClicked
+        )
     }
 }
 
 @Composable
 private fun DecksList(
-    decks: List<Deck>
+    decks: List<Deck>,
+    onSelectDeck: (Deck) -> Unit,
+    onDeleteClicked: (Int) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -98,17 +116,56 @@ private fun DecksList(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(decks) { item ->
+            val painter = rememberAsyncImagePainter(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(item.imageUrl)
+                    .crossfade(true)
+                    .build()
+            )
+
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f),
-                elevation = CardDefaults.cardElevation(4.dp)
+                    .aspectRatio(1f)
+                    .clickable { onSelectDeck(item) },
+                elevation = CardDefaults.cardElevation(12.dp)
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = item.name)
+                    Image(
+                        painter = painter,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .background(
+                                color = Color.White,
+                                shape = CircleShape
+                            )
+                            .align(Alignment.TopEnd)
+                            .clickable { onDeleteClicked(item.id) }
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_delete),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .padding(12.dp)
+                        )
+                    }
+
+                    Text(
+                        modifier = Modifier.padding(8.dp),
+                        text = item.name,
+                        color = Color.White,
+                        fontSize = TextUnit(20f, TextUnitType.Sp)
+                    )
                 }
             }
         }
@@ -141,7 +198,8 @@ private fun DeckSelectionScreenPreview() {
                         imageUrl = ""
                     )
                 )
-            )
+            ),
+            onDeleteClicked = {}
         )
     }
 }
